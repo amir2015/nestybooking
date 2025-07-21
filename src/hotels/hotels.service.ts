@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 
 @Injectable()
-export class HotelService {
+export class HotelsService {
   constructor(
     @InjectRepository(Hotel)
     private readonly hotelRepository: Repository<Hotel>,
