@@ -1,0 +1,35 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Room } from './entities/room.entity';
+import { Repository } from 'typeorm';
+import { CreateRoomDto } from './dto/create-room.dto';
+
+@Injectable()
+export class RoomsService {
+  constructor(
+    @InjectRepository(Room)
+    private readonly roomRepository: Repository<Room>,
+  ) {}
+  async create(createRoomDto: CreateRoomDto): Promise<Room> {
+    const room = this.roomRepository.create(createRoomDto);
+    return this.roomRepository.save(room);
+  }
+  async findAvailableRooms(
+    hotelId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Room[]> {
+    return this.roomRepository
+      .createQueryBuilder('room')
+      .leftJoin('room.bookings', 'booking')
+      .where('room.hotelId = :hotelId', { hotelId })
+      .andWhere('room.isAvailable = :isAvailable', { isAvailable: true })
+      .andWhere(
+        '(booking.id IS NULL OR NOT (' +
+          'booking.checkInDate <= :endDate AND ' +
+          'booking.checkOutDate >= :startDate))',
+        { startDate, endDate },
+      )
+      .getMany();
+  }
+}
