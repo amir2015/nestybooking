@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from './entities/room.entity';
 import { Repository } from 'typeorm';
@@ -31,5 +31,13 @@ export class RoomsService {
         { startDate, endDate },
       )
       .getMany();
+  }
+  async updateAvailability(roomId:string, isAvailable: boolean): Promise<Room>{
+    const room =await this.roomRepository.findOne({where:{id:roomId}})
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    room.isAvailable = isAvailable;
+    return await this.roomRepository.save(room);
   }
 }
