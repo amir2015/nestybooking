@@ -1,18 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AdminService {
-    constructor() {
-        
-    }
+  constructor() {}
 
-    // Example method to get admin dashboard data
-    getDashboardData() {
-        return {
-        message: "Admin dashboard data",
-        timestamp: new Date(),
-        };
-    }
-
-    // Add more methods as needed for admin functionalities
+  // Example method to get admin dashboard data
+  getDashboardData() {
+    console.log('Fetching admin dashboard data');
+  }
 }
