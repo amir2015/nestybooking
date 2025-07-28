@@ -1,5 +1,12 @@
-import { Room } from 'src/rooms/entities/room.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Room } from '../../rooms/entities/room.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('hotels')
 export class Hotel {
@@ -26,11 +33,12 @@ export class Hotel {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
+
   @OneToMany(() => Room, (room) => room.hotel)
   rooms: Room[];
 }

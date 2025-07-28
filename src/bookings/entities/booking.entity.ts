@@ -1,6 +1,13 @@
-import { Room } from 'src/rooms/entities/room.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Room } from '../../rooms/entities/room.entity';
+import { User } from '../../users/entities/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('bookings')
 export class Booking {
@@ -30,8 +37,9 @@ export class Booking {
   isPaid: boolean;
   @Column({ nullable: true })
   cancellationReason: string;
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
-  @Column()
+
+  @UpdateDateColumn()
   updatedAt: Date;
 }
