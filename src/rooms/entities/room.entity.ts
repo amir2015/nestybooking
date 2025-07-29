@@ -1,7 +1,14 @@
-// src/rooms/entities/room.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Hotel } from '../../hotels/entities/hotel.entity';
-import { Booking } from 'src/bookings/entities/booking.entity';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity('rooms')
 export class Room {
@@ -26,10 +33,10 @@ export class Room {
   @Column({ default: true })
   isAvailable: boolean;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @ManyToOne(() => Hotel, (hotel) => hotel.rooms)
