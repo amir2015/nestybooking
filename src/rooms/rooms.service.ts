@@ -32,12 +32,38 @@ export class RoomsService {
       )
       .getMany();
   }
-  async updateAvailability(roomId:string, isAvailable: boolean): Promise<Room>{
-    const room =await this.roomRepository.findOne({where:{id:roomId}})
+  async updateAvailability(
+    roomId: string,
+    isAvailable: boolean,
+  ): Promise<Room> {
+    const room = await this.roomRepository.findOne({ where: { id: roomId } });
     if (!room) {
       throw new NotFoundException('Room not found');
     }
     room.isAvailable = isAvailable;
     return await this.roomRepository.save(room);
+  }
+  async checkRoomAvailability(
+    roomId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Room> {
+    const room = await this.roomRepository.findOne({ where: { id: roomId } });
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    const isAvailable = await this.roomRepository
+      .createQueryBuilder('room')
+      .leftJoin('room.bookings', 'booking')
+      .where('room.id = :roomId', { roomId })
+      .andWhere(
+        '(booking.checkInDate > :endDate OR booking.checkOutDate < :startDate OR booking.id IS NULL)',
+        { startDate, endDate },
+      )
+      .getCount();
+    if (isAvailable === 0) {
+      throw new NotFoundException('Room is not available');
+    }
+    return room;
   }
 }

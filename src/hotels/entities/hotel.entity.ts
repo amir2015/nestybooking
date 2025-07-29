@@ -25,7 +25,7 @@ export class Hotel {
   @Column('text')
   description: string;
 
-  @Column('decimal', { precision: 2 })
+  @Column('decimal', { precision: 2, nullable: true })
   rating: number;
 
   @Column('simple-array')

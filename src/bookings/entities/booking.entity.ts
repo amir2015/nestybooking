@@ -23,16 +23,16 @@ export class Booking {
   @Column()
   checkOutDate: Date;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2 , default: 0})
   totalPrice: number;
   @Column({
     type: 'enum',
-    enum: ['pending', 'confirmed', 'cancelled'],
+    enum: ['pending', 'confirmed', 'cancelled', 'completed'],
     default: 'pending',
   })
   status: string;
   @Column({ nullable: true })
-  paymentId: string;
+  paymentIntentId: string;
   @Column({ default: false })
   isPaid: boolean;
   @Column({ nullable: true })

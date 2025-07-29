@@ -19,6 +19,6 @@ export class CreateHotelDto {
   phone?: string;
   @IsString()
   email?: string;
-  @IsString()
-  website?: string;
+  @IsString({ each: true })
+  amenities: string[];
 }
