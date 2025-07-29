@@ -31,6 +31,9 @@ export class User {
   @Exclude()
   password: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+  
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
   @CreateDateColumn()

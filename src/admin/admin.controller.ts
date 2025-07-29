@@ -23,7 +23,11 @@ export class AdminController {
   }
   @Get('users')
   async getUsers(@Query('page') page = 1, @Query('limit') limit = 10) {
-    // return await this.adminService.getUsers(page, limit);
+    return await this.adminService.getUsers(page, limit);
+  }
+  @Get('bookings/:id')
+  async getSingleBooking(@Param('id') id: string) {
+    return await this.adminService.getSingleBooking(id);
   }
   @Get('bookings')
   async getAllBookings(
@@ -31,10 +35,10 @@ export class AdminController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {
-    // return await this.adminService.getAllBookings(status, page, limit);
+     return await this.adminService.getAllBookings(status, page, limit);
   }
   @Put('users/:id/toggle-status')
   async toggleUserStatus(@Param('id') id: string) {
-    // return await this.adminService.toggleUserStatus(id);
+     return await this.adminService.toggleUserStatus(id);
   }
 }
