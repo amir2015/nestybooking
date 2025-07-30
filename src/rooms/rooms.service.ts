@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from './entities/room.entity';
 import { Repository } from 'typeorm';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { Booking } from 'src/bookings/entities/booking.entity';
 
 @Injectable()
 export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private readonly roomRepository: Repository<Room>,
+    @InjectRepository(Booking)
+    private readonly bookingsRepository: Repository<Booking>,
   ) {}
   async create(createRoomDto: CreateRoomDto): Promise<Room> {
     const room = this.roomRepository.create(createRoomDto);
@@ -32,12 +35,35 @@ export class RoomsService {
       )
       .getMany();
   }
-  async updateAvailability(roomId:string, isAvailable: boolean): Promise<Room>{
-    const room =await this.roomRepository.findOne({where:{id:roomId}})
+  async updateAvailability(
+    roomId: string,
+    isAvailable: boolean,
+  ): Promise<Room> {
+    const room = await this.roomRepository.findOne({ where: { id: roomId } });
     if (!room) {
       throw new NotFoundException('Room not found');
     }
     room.isAvailable = isAvailable;
     return await this.roomRepository.save(room);
+  }
+  async checkRoomAvailability(
+    roomId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<boolean> {
+    const room = await this.roomRepository.findOne({ where: { id: roomId } });
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    const overLappingBookings = await this.bookingsRepository
+      .createQueryBuilder('booking')
+      .where('booking.roomId = :roomId', { roomId })
+      .andWhere(
+        'booking.checkInDate < :endDate AND booking.checkOutDate > :startDate',
+        { endDate, startDate },
+      )
+      .getCount();
+    return overLappingBookings === 0;
   }
 }
