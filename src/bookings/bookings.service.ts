@@ -43,7 +43,8 @@ export class BookingsService {
       ...createBookingDto,
       user: { id: userId },
     });
-    return await this.bookingRepository.save(booking);
+    const savedBooking = await this.bookingRepository.save(booking);
+    return { id: savedBooking.id, ...savedBooking };
   }
   async getBookings(userId: string): Promise<Booking[]> {
     return this.bookingRepository.find({
@@ -55,17 +56,19 @@ export class BookingsService {
   async getBookingById(bookingId: string): Promise<Booking> {
     return this.bookingRepository.findOne({
       where: { id: bookingId },
-      relations: ['room', 'room.hotel'],
+      relations: ['room', 'room.hotel', 'user'],
     });
   }
-  async cancelBooking(bookingId: string, userId: string): Promise<Booking> {
+  async cancelBooking(bookingId: string, userId: string) {
     const booking = await this.getBookingById(bookingId);
+    console.log('Booking:', booking);
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
-    if (booking.user.id !== userId) {
+    if (!booking.user || booking.user.id !== userId) {
       throw new BadRequestException('You can only cancel your own bookings');
     }
+    console.log('Booking User ID:', booking.user.id);
     const cancellationAllowed = this.checkCancellationPolicy(booking);
     if (!cancellationAllowed) {
       throw new BadRequestException(
@@ -75,6 +78,10 @@ export class BookingsService {
     booking.status = 'cancelled';
     const updatedBooking = await this.bookingRepository.save(booking);
     await this.roomsService.updateAvailability(booking.room.id, true);
+    console.log('Updated Booking:', updatedBooking);
+    console.log(booking.roomId);
+    console.log(booking.room.id);
+
     return updatedBooking;
   }
   private checkCancellationPolicy(booking: Booking): boolean {
