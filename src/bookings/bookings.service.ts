@@ -20,21 +20,30 @@ export class BookingsService {
     createBookingDto: CreateBookingDto,
     userId: string,
   ): Promise<Booking> {
+    if (
+      new Date(createBookingDto.checkInDate) >=
+      new Date(createBookingDto.checkOutDate)
+    ) {
+      throw new BadRequestException(
+        'Check-out date must be after check-in date',
+      );
+    }
     const isAvailable = await this.roomsService.checkRoomAvailability(
       createBookingDto.roomId,
       createBookingDto.checkInDate,
       createBookingDto.checkOutDate,
     );
     if (!isAvailable) {
-      throw new Error('Room is not available for the selected dates');
+      throw new BadRequestException(
+        'Room is not available for the selected dates',
+      );
     }
+
     const booking = this.bookingRepository.create({
       ...createBookingDto,
       user: { id: userId },
     });
-    const createdBooking = await this.bookingRepository.save(booking);
-    await this.roomsService.updateAvailability(createBookingDto.roomId, false);
-    return createdBooking;
+    return await this.bookingRepository.save(booking);
   }
   async getBookings(userId: string): Promise<Booking[]> {
     return this.bookingRepository.find({

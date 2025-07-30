@@ -17,13 +17,17 @@ export class Booking {
   user: User;
   @ManyToOne(() => Room, (room) => room.bookings)
   room: Room;
+
+  @Column()
+  roomId: string;
+
   @Column()
   checkInDate: Date;
 
   @Column()
   checkOutDate: Date;
 
-  @Column('decimal', { precision: 10, scale: 2 , default: 0})
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   totalPrice: number;
   @Column({
     type: 'enum',
@@ -31,6 +35,7 @@ export class Booking {
     default: 'pending',
   })
   status: string;
+
   @Column({ nullable: true })
   paymentIntentId: string;
   @Column({ default: false })
