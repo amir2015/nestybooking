@@ -8,6 +8,7 @@ import { Booking } from './entities/booking.entity';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { RoomsService } from '../rooms/rooms.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class BookingsService {
@@ -15,6 +16,7 @@ export class BookingsService {
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
     private readonly roomsService: RoomsService,
+    private readonly emailService: EmailService,
   ) {}
   async createBooking(
     createBookingDto: CreateBookingDto,
@@ -44,6 +46,7 @@ export class BookingsService {
       user: { id: userId },
     });
     const savedBooking = await this.bookingRepository.save(booking);
+    await this.emailService.sendBookingConfirmation(savedBooking);
     return { id: savedBooking.id, ...savedBooking };
   }
   async getBookings(userId: string): Promise<Booking[]> {
