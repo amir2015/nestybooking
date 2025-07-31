@@ -7,9 +7,10 @@ import { BookingsController } from './bookings.controller';
 import { ModifyBookingService } from './bookingModification.service';
 import e from 'express';
 import { EmailModule } from 'src/email/email.module';
+import { PaymentsModule } from 'src/payments/payments.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking]), RoomsModule, EmailModule],
+  imports: [TypeOrmModule.forFeature([Booking]), RoomsModule, EmailModule,PaymentsModule],
   controllers: [BookingsController],
   providers: [BookingsService, ModifyBookingService],
   exports: [BookingsService],
