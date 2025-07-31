@@ -20,7 +20,8 @@ export class Room {
 
   @Column()
   type: string;
-
+  @Column({ nullable: true })
+  hotelId: string;
   @Column('decimal')
   pricePerNight: number;
 

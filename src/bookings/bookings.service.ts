@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { RoomsService } from '../rooms/rooms.service';
 import { EmailService } from 'src/email/email.service';
+import { StripeService } from 'src/payments/stripe.service';
 
 @Injectable()
 export class BookingsService {
@@ -17,15 +18,12 @@ export class BookingsService {
     private readonly bookingRepository: Repository<Booking>,
     private readonly roomsService: RoomsService,
     private readonly emailService: EmailService,
+    private readonly stripeService: StripeService,
   ) {}
-  async createBooking(
-    createBookingDto: CreateBookingDto,
-    userId: string,
-  ): Promise<Booking> {
-    if (
-      new Date(createBookingDto.checkInDate) >=
-      new Date(createBookingDto.checkOutDate)
-    ) {
+  async createBooking(createBookingDto: CreateBookingDto, userId: string) {
+    const checkIn = new Date(createBookingDto.checkInDate);
+    const checkOut = new Date(createBookingDto.checkOutDate);
+    if (checkIn >= checkOut) {
       throw new BadRequestException(
         'Check-out date must be after check-in date',
       );
@@ -40,14 +38,42 @@ export class BookingsService {
         'Room is not available for the selected dates',
       );
     }
+    const room = await this.roomsService.getRoomById(createBookingDto.roomId);
 
+    const nights =
+      Math.ceil(
+        (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
+      ) || 1;
+    const totalPriceForBooking = room.pricePerNight * nights;
+    if (totalPriceForBooking > 1000000) {
+      throw new BadRequestException('Invalid total price for booking');
+    }
+
+    const paymentIntent =
+      await this.stripeService.createPaymentIntent(totalPriceForBooking);
+    if (paymentIntent.status !== 'succeeded') {
+      throw new BadRequestException('Payment failed');
+    }
     const booking = this.bookingRepository.create({
       ...createBookingDto,
       user: { id: userId },
+      paymentIntentId: paymentIntent.id,
+      totalPrice: totalPriceForBooking,
+      paymentStatus: paymentIntent.status,
+      paidAt: paymentIntent.status === 'succeeded' ? new Date() : null,
+      isPaid: true,
     });
-    const savedBooking = await this.bookingRepository.save(booking);
-    await this.emailService.sendBookingConfirmation(savedBooking);
-    return { id: savedBooking.id, ...savedBooking };
+    await this.bookingRepository.save(booking);
+    const finalBooking = await this.bookingRepository.findOne({
+      where: { id: booking.id },
+      relations: ['room', 'room.hotel', 'user'],
+    });
+    if (!finalBooking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    await this.emailService.sendBookingConfirmation(finalBooking);
+    return finalBooking;
   }
   async getBookings(userId: string): Promise<Booking[]> {
     return this.bookingRepository.find({
@@ -64,14 +90,14 @@ export class BookingsService {
   }
   async cancelBooking(bookingId: string, userId: string) {
     const booking = await this.getBookingById(bookingId);
-    console.log('Booking:', booking);
+
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
     if (!booking.user || booking.user.id !== userId) {
       throw new BadRequestException('You can only cancel your own bookings');
     }
-    console.log('Booking User ID:', booking.user.id);
+
     const cancellationAllowed = this.checkCancellationPolicy(booking);
     if (!cancellationAllowed) {
       throw new BadRequestException(
@@ -81,10 +107,10 @@ export class BookingsService {
     booking.status = 'cancelled';
     const updatedBooking = await this.bookingRepository.save(booking);
     await this.roomsService.updateAvailability(booking.room.id, true);
-    console.log('Updated Booking:', updatedBooking);
-    console.log(booking.roomId);
-    console.log(booking.room.id);
-
+    await this.emailService.sendCancellationEmail(updatedBooking);
+    if (booking.isPaid) {
+      await this.stripeService.refundPayment(booking.paymentIntentId);
+    }
     return updatedBooking;
   }
   private checkCancellationPolicy(booking: Booking): boolean {

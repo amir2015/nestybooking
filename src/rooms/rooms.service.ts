@@ -66,4 +66,14 @@ export class RoomsService {
       .getCount();
     return overLappingBookings === 0;
   }
+  async getRoomById(roomId: string): Promise<Room> {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['hotel'],
+    });
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    return room;
+  }
 }

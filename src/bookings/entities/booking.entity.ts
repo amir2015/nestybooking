@@ -44,7 +44,13 @@ export class Booking {
   cancellationReason: string;
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  paymentStatus?: string;
+  @Column({ nullable: true, type: 'timestamp' })
+  paidAt?: Date;
+  @Column({ nullable: true })
+  paymentMethod?: string;
 }

@@ -34,6 +34,14 @@ export class EmailService {
       ],
     });
   }
+  async sendCancellationEmail(booking: Booking) {
+    this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: booking.user.email,
+      subject: 'Booking Cancellation',
+      text: `Your booking with ID ${booking.id} has been cancelled.`,
+    });
+  }
   private async generateInvoicePDF(booking: Booking): Promise<Buffer> {
     return new Promise((resolve) => {
       const doc = new PDFDocument();
