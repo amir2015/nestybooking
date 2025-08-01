@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './database/data-source';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { dataSourceOptions } from './database/data-source';
     PaymentsModule,
     EmailModule,
     AdminModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
