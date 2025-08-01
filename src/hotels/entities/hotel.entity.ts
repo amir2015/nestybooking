@@ -1,3 +1,4 @@
+import { Favorite } from 'src/favorites/entities/favorites.entity';
 import { Room } from '../../rooms/entities/room.entity';
 import {
   Column,
@@ -41,4 +42,7 @@ export class Hotel {
 
   @OneToMany(() => Room, (room) => room.hotel)
   rooms: Room[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.hotel)
+  favorites: Favorite[];
 }

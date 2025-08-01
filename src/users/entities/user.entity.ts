@@ -9,6 +9,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { Booking } from '../../bookings/entities/booking.entity';
 import { Role } from '../../auth/roles.enum';
+import { Favorite } from 'src/favorites/entities/favorites.entity';
 
 @Entity('users')
 export class User {
@@ -33,7 +34,7 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
-  
+
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
   @CreateDateColumn()
@@ -41,4 +42,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  favorites: Favorite[];
 }
