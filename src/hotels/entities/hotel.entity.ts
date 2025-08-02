@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Review } from 'src/reviews/reviews.entity';
 
 @Entity('hotels')
 export class Hotel {
@@ -45,4 +46,6 @@ export class Hotel {
 
   @OneToMany(() => Favorite, (favorite) => favorite.hotel)
   favorites: Favorite[];
+  @OneToMany(() => Review, (review) => review.hotel)
+  reviews: Review[];
 }

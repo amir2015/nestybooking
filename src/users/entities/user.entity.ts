@@ -10,6 +10,7 @@ import { Exclude } from 'class-transformer';
 import { Booking } from '../../bookings/entities/booking.entity';
 import { Role } from '../../auth/roles.enum';
 import { Favorite } from 'src/favorites/entities/favorites.entity';
+import { Review } from 'src/reviews/reviews.entity';
 
 @Entity('users')
 export class User {
@@ -45,4 +46,6 @@ export class User {
 
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   favorites: Favorite[];
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 }
